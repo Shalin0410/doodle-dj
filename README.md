@@ -8,13 +8,21 @@ Node version: `v22.8.0`
 
 ```
 git clone https://github.com/atharvaswami/doodle-dj.git
+cd doodle-dj
+
+cd backend
+python -m venv venv
+.\venv\Scripts\activate
+pip install -r requirements.txt
+
+cd frontend
+npm install
 ```
 
 ### To start the frontend server:
 
 ```
 cd frontend
-npm install
 npm start
 ```
 
@@ -23,6 +31,5 @@ npm start
 ```
 cd backend
 .\venv\Scripts\activate
-pip install -r requirements.txt
 python app.py
 ```
