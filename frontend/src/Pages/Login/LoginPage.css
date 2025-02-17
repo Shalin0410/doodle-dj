@@ -1,0 +1,27 @@
+@import url("https://fonts.googleapis.com/css2?family=Modak&family=Roboto:wght@300;400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Modak&family=Roboto&display=swap");
+
+.login-page {
+  height: 100vh;
+  background-image: url("../../Assets/background.png");
+  background-size: cover;
+}
+
+.logo {
+  color: white;
+  font-family: "Modak", serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 48px;
+  margin-left: 4vw;
+  margin-top: 4vh;
+}
+
+.tag-line {
+  font-family: "Black Ops One", serif;
+  font-weight: 400;
+  font-style: normal;
+  color: white;
+  padding: 0px 0px 6vw 4vw;
+  font-size: 80px;
+}
