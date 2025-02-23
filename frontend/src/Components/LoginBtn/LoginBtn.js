@@ -48,10 +48,10 @@ const LoginBtn = ({ text }) => {
   return (
     <Button
       variant="light"
-      className="login-btn me-5 mt-4 rounded-pill"
+      className="login-btn mt-4 rounded"
       onClick={signInWithGoogle}
     >
-      <div className="d-flex  align-items-center gap-3 w-100">
+      <div className="d-flex align-items-center gap-3">
         <FcGoogle style={{ fontSize: "2rem" }} />
         <div>{text}</div>
       </div>
