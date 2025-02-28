@@ -3,6 +3,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { FcGoogle } from "react-icons/fc";
 import "./LoginBtn.css";
+import { useNavigate } from "react-router-dom";
 import { Button } from "react-bootstrap";
 
 const LoginBtn = ({ text }) => {
@@ -20,6 +21,7 @@ const LoginBtn = ({ text }) => {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth();
   const provider = new GoogleAuthProvider();
+  const navigate = useNavigate();
 
   const signInWithGoogle = () => {
     signInWithPopup(auth, provider)
@@ -32,6 +34,7 @@ const LoginBtn = ({ text }) => {
         // IdP data available using getAdditionalUserInfo(result)
         // ...
         console.log("User: ", user);
+        navigate("/studio");
       })
       .catch((error) => {
         // Handle Errors here.

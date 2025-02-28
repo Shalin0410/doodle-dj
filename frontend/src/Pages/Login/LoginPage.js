@@ -10,8 +10,8 @@ const LoginPage = () => {
       <div className=" d-flex justify-content-between ">
         <div className="d-flex justify-content-between flex-column">
           <h1 className="logo">
-            <div className="d-flex">
-              <img src={redLogo} style={{ width: "5rem" }} />
+            <div className="d-flex overflow-y-hidden">
+              <img src={redLogo} style={{ width: "5rem" }} alt="Logo" />
               Doodle DJ
             </div>
           </h1>
@@ -29,7 +29,7 @@ const LoginPage = () => {
         </p>
       </div>
       <div className=" d-flex justify-content-end">
-        <img className="right-image" src={rightImage} />
+        <img className="right-image" src={rightImage} alt="rightImage" />
       </div>
       <div className="d-flex justify-content-center align-items-center p-2 footer">
         2025 © Byte On | All rights reserved.

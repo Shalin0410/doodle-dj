@@ -1,0 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap');
+
+.studio-page {
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(90deg, rgba(246, 64, 195) 0%, #df7d41 100%);
+}
