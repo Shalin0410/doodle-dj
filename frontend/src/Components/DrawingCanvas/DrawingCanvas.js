@@ -45,12 +45,10 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
     if (!canvas) return { x: 0, y: 0 };
 
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
 
     return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top,
     };
   };
 
@@ -64,16 +62,17 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
 
+    // Set canvas size to account for devicePixelRatio
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
 
+    // Scale context to ensure proper drawing coordinates
     ctx.scale(dpr, dpr);
 
     ctx.fillStyle = "#ffffff";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillRect(0, 0, rect.width, rect.height);
 
-    saveToHistory(ctx.getImageData(0, 0, canvas.width, canvas.height));
-    // eslint-disable-next-line
+    saveToHistory(ctx.getImageData(0, 0, rect.width, rect.height));
   }, []);
 
   const saveToHistory = (imageData) => {
@@ -196,7 +195,7 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
             }`}
             onClick={() => setLineWidth(8)}
           >
-            <div class="circle large" />
+            <div className="circle large" />
           </div>
           <div
             className={`brush-div border border-secondary d-flex flex-column justify-content-center align-items-center ${
@@ -204,7 +203,7 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
             }`}
             onClick={() => setLineWidth(6)}
           >
-            <div class="circle medium" />
+            <div className="circle medium" />
           </div>
           <div
             className={`brush-div border border-secondary d-flex flex-column justify-content-center align-items-center ${
@@ -212,7 +211,7 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
             }`}
             onClick={() => setLineWidth(4)}
           >
-            <div class="circle small" />
+            <div className="circle small" />
           </div>
           <div
             className={`brush-div border border-secondary d-flex flex-column justify-content-center align-items-center ${
@@ -220,7 +219,7 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
             }`}
             onClick={() => setLineWidth(2)}
           >
-            <div class="circle extra-small" />
+            <div className="circle extra-small" />
           </div>
         </div>
       </div>
@@ -286,6 +285,8 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
               className="vw-100"
               style={{
                 maxHeight: "75vh",
+                width: "100%",
+                height: "auto",
                 cursor: "crosshair",
                 touchAction: "none",
               }}
