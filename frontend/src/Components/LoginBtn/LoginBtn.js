@@ -4,7 +4,7 @@ import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import "./LoginBtn.css";
-import { auth } from "../../📄 firebaseConfig"; // Import auth from firebaseConfig
+import { auth } from "../../firebaseConfig"; // Import auth from firebaseConfig
 
 const LoginBtn = ({ text }) => {
   const provider = new GoogleAuthProvider();
