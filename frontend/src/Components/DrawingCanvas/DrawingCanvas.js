@@ -282,11 +282,9 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
           <div className="canvas-container">
             <canvas
               ref={canvasRef}
-              className="vw-100"
               style={{
-                maxHeight: "75vh",
-                width: "100%",
                 height: "auto",
+                width: "100%",
                 cursor: "crosshair",
                 touchAction: "none",
               }}

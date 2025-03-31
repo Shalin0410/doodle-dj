@@ -21,7 +21,7 @@ const LogoutBtn = () => {
     <div>
       <button
         type="button"
-        className="btn btn-light logout-btn p-2 px-4 rounded-5"
+        className="btn btn-light logout-btn p-2 px-4 rounded-5 mt-2"
         onClick={handleLogout}
       >
         Log Out

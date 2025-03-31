@@ -69,18 +69,21 @@ const StudioPage = () => {
         <div className="col-md-8">
           <DrawingCanvas onSubmit={handleDrawingSubmit} isLoading={isLoading} />
         </div>
-        <div className="col-md-4 overflow-hidden">
+        <div className="col-md-4 overflow-hidden d-flex flex-column align-items-center justify-content-center">
           {songs.length === 0 ? (
-            <div className="text-center mt-4 overflow-hidden">
-              <h3 className="mb-3 overflow-hidden">
+            <div className="text-center mt-4 overflow-hidden song-list-color">
+              <p
+                className="mb-3 overflow-hidden song-list"
+                style={{ fontSize: "3vw" }}
+              >
                 Let your creativity flow.
-              </h3>
-              <p className="text-muted">
+              </p>
+              <p className="song-list" style={{ fontSize: "1.5vw" }}>
                 Your next favourite song is just a doodle away.
               </p>
             </div>
           ) : (
-            <MusicPlayer songs={songs} />
+            <MusicPlayer songs={songs} setSongs={setSongs} />
           )}
         </div>
       </div>

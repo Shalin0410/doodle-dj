@@ -1,14 +1,14 @@
 import { useState, useRef, useEffect } from "react";
 import { Button, Form, Card, Stack } from "react-bootstrap";
 import { Play, Pause, Heart, Volume2 } from "lucide-react";
-
+import "./MusicPlayer.css";
 // interface Song {
 //   title: string
 //   artist: string
 //   url: string
 // }
 
-const MusicPlayer = ({ songs }) => {
+const MusicPlayer = ({ songs, setSongs }) => {
   const [currentSong, setCurrentSong] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -88,7 +88,10 @@ const MusicPlayer = ({ songs }) => {
   const clearQueue = () => {
     // In a real app, this would clear the queue
     // For this demo, we'll just alert the user
-    alert("Queue cleared functionality would be implemented here");
+    // alert("Queue cleared functionality would be implemented here");
+    const currentlyPlaying = songs[currentSong];
+    setSongs([currentlyPlaying]);
+    setCurrentSong(0);
   };
 
   // Get the queue (all songs except the current one)
@@ -109,7 +112,7 @@ const MusicPlayer = ({ songs }) => {
   }
 
   return (
-    <div className="p-3 rounded" style={{ backgroundColor: "#ffcdc1" }}>
+    <div className="p-3 rounded music-player">
       <audio
         ref={audioRef}
         src={songs[currentSong].url}
@@ -126,19 +129,10 @@ const MusicPlayer = ({ songs }) => {
       <div className="d-flex justify-content-between align-items-center mb-2">
         <h5 className="m-0 fw-bold">Currently Playing:</h5>
         <div className="d-flex gap-2">
-          <Button
-            variant="outline-danger"
-            size="sm"
-            className="rounded-circle p-1"
-          >
+          <Button variant="outline-danger" className="rounded-circle">
             <Heart size={16} />
           </Button>
-          <Button
-            variant="light"
-            size="sm"
-            className="rounded-pill"
-            onClick={handleSkip}
-          >
+          <Button variant="light" className="rounded-pill" onClick={handleSkip}>
             Skip
           </Button>
         </div>
@@ -169,9 +163,7 @@ const MusicPlayer = ({ songs }) => {
             </div>
             <div className="flex-grow-1">
               <div className="fw-bold">{songs[currentSong].title}</div>
-              <div className="text-muted small">
-                {songs[currentSong].artist}
-              </div>
+              <div className="text-muted">{songs[currentSong].artist}</div>
             </div>
             <div>
               <Button
@@ -217,42 +209,51 @@ const MusicPlayer = ({ songs }) => {
       </div>
 
       <Stack gap={2}>
-        {getQueue().map((song, index) => (
-          <Card key={index} className="bg-light">
-            <Card.Body className="p-2">
-              <div className="d-flex align-items-center">
-                <div
-                  className="me-2"
-                  style={{
-                    width: "40px",
-                    height: "40px",
-                    position: "relative",
-                  }}
-                >
+        {getQueue().map((song, index) => {
+          const adjustedIndex = (currentSong + 1 + index) % songs.length;
+
+          return (
+            <Card
+              key={index}
+              className="bg-light"
+              onClick={() => setCurrentSong(adjustedIndex)}
+              style={{ cursor: "pointer" }}
+            >
+              <Card.Body className="p-2">
+                <div className="d-flex align-items-center">
                   <div
+                    className="me-2"
                     style={{
                       width: "40px",
                       height: "40px",
-                      backgroundColor: "#333",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "white",
-                      fontSize: "10px",
-                      textAlign: "center",
+                      position: "relative",
                     }}
                   >
-                    ALBUM
+                    <div
+                      style={{
+                        width: "40px",
+                        height: "40px",
+                        backgroundColor: "#333",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        color: "white",
+                        fontSize: "10px",
+                        textAlign: "center",
+                      }}
+                    >
+                      ALBUM
+                    </div>
+                  </div>
+                  <div>
+                    <div className="fw-bold">{song.title}</div>
+                    <div className="text-muted">{song.artist}</div>
                   </div>
                 </div>
-                <div>
-                  <div className="fw-bold">{song.title}</div>
-                  <div className="text-muted small">{song.artist}</div>
-                </div>
-              </div>
-            </Card.Body>
-          </Card>
-        ))}
+              </Card.Body>
+            </Card>
+          );
+        })}
       </Stack>
     </div>
   );
