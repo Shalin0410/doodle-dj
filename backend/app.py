@@ -23,8 +23,8 @@ load_dotenv()
 # Get username and password from environment variables
 username = os.getenv('MONGO_USERNAME')
 password = os.getenv('MONGO_PASSWORD')
-spotify_client_id = ''
-spotify_client_secret = ''
+spotify_client_id = os.getenv("SPOTIFY_CLIENT_ID")
+spotify_client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
 
 # Load database name from config file
 with open('config.json') as config_file:
