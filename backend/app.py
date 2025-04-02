@@ -25,6 +25,7 @@ username = os.getenv('MONGO_USERNAME')
 password = os.getenv('MONGO_PASSWORD')
 spotify_client_id = os.getenv("SPOTIFY_CLIENT_ID")
 spotify_client_secret = os.getenv("SPOTIFY_CLIENT_SECRET")
+jamendo_client_id = os.getenv("JAMENDO_CLIENT_ID")
 
 # Load database name from config file
 with open('config.json') as config_file:
@@ -100,6 +101,53 @@ def search_tracks():
         logger.error(f"Error during /search: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
 
+def search_jamendo_tracks(keywords, limit=5):
+    logger.info(f"Searching Jamendo for keywords: {keywords}")
+    url = "https://api.jamendo.com/v3.0/tracks"
+    params = {
+        "client_id": jamendo_client_id,
+        "format": "json",
+        "limit": limit,
+        "fuzzytags": keywords,
+        "audioformat": "mp31"
+    }
+
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+    items = response.json()["results"]
+
+    logger.info(f"Found {len(items)} tracks for keywords: '{keywords}'.")
+
+    results = [
+        {
+            "track_name": item["name"],
+            "artist": item["artist_name"],
+            "album": item["album_name"],
+            "audio_url": item["audio"],  # Full MP3 track URL
+            "image": item["album_image"],
+            "external_url": item["shareurl"]
+        }
+        for item in items
+    ]
+
+    logger.debug(f"Jamendo Tracks result: {results}")
+    return results
+
+
+@app.route('/jamendo/search', methods=['GET'])
+def jamendo_search():
+    keywords = request.args.get("keywords")
+    if not keywords:
+        logger.warning("Missing 'keywords' parameter in request.")
+        return jsonify({"error": "Missing 'keywords' parameter"}), 400
+
+    try:
+        results = search_jamendo_tracks(keywords)
+        logger.info(f"Returning {len(results)} Jamendo results for query: '{keywords}'")
+        return jsonify(results)
+    except Exception as e:
+        logger.error(f"Error during /jamendo/search: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
 
 @app.route('/')
 def hello_world():
