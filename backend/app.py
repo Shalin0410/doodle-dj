@@ -133,6 +133,35 @@ def search_jamendo_tracks(keywords, limit=5):
     logger.debug(f"Jamendo Tracks result: {results}")
     return results
 
+def search_deezer_tracks(keywords, limit=5):
+    logger.info(f"Searching Deezer for keywords: {keywords}")
+    url = "https://api.deezer.com/search"
+    params = {
+        "q": keywords,
+        "limit": limit
+    }
+
+    response = requests.get(url, params=params)
+    response.raise_for_status()
+    items = response.json()["data"]
+
+    logger.info(f"Found {len(items)} tracks for keywords: '{keywords}'.")
+
+    results = [
+        {
+            "track_name": item["title"],
+            "artist": item["artist"]["name"],
+            "album": item["album"]["title"],
+            "preview_url": item["preview"],  # 30s preview MP3 stream
+            "embed_url": f"https://widget.deezer.com/widget/dark/track/{item['id']}",  # Full playback via iframe
+            "external_url": item["link"],
+            "image": item["album"]["cover_medium"]
+        }
+        for item in items
+    ]
+
+    logger.debug(f"Deezer Tracks result: {results}")
+    return results
 
 @app.route('/jamendo/search', methods=['GET'])
 def jamendo_search():
@@ -148,6 +177,22 @@ def jamendo_search():
     except Exception as e:
         logger.error(f"Error during /jamendo/search: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
+
+@app.route('/deezer/search', methods=['GET'])
+def deezer_search():
+    keywords = request.args.get("keywords")
+    if not keywords:
+        logger.warning("Missing 'keywords' parameter in request.")
+        return jsonify({"error": "Missing 'keywords' parameter"}), 400
+
+    try:
+        results = search_deezer_tracks(keywords)
+        logger.info(f"Returning {len(results)} Deezer results for query: '{keywords}'")
+        return jsonify(results)
+    except Exception as e:
+        logger.error(f"Error during /deezer/search: {str(e)}", exc_info=True)
+        return jsonify({"error": str(e)}), 500
+
 
 @app.route('/')
 def hello_world():
