@@ -177,6 +177,74 @@ def jamendo_search():
     except Exception as e:
         logger.error(f"Error during /jamendo/search: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
+    
+
+# @app.route('/process', methods=['POST'])
+# def process():
+#     data = request.get_json()
+#     image_url = data.get('url')
+#     user = data.get('username')
+
+#     if not image_url or not user:
+#         return jsonify({"error": "Missing 'url' or 'username'"}), 400
+
+#     db.insert_one({"username": user, "url": image_url})
+
+#     try:
+#         keyword_response = requests.post("https://first-api.com/get_keywords", json={"image_url": image_url})
+#         keyword_response.raise_for_status()
+#         keywords_list = keyword_response.json().get("keywords", [])
+
+#         if not keywords_list:
+#             return jsonify({"error": "No keywords returned from keyword API"}), 500
+
+#         keywords_str = " ".join(keywords_list)
+
+#         requests.get("http://127.0.0.1:5000//jamendo/search", params={"keywords": keywords_str})
+
+#         return jsonify({
+#             "message": "Keywords extracted and sent to Jamendo.",
+#             "keywords": keywords_list
+#         }), 200
+
+#     except requests.exceptions.RequestException as e:
+#         return jsonify({"error": f"Request failed: {str(e)}"}), 500
+    
+
+
+def get_dummy_keywords(image_url):
+    return ["happy main character energy"]
+
+@app.route('/process', methods=['POST'])
+def process():
+    data = request.get_json()
+    image_url = data.get('url')
+    user = data.get('username')
+
+    if not image_url or not user:
+        return jsonify({"error": "Missing 'url' or 'username'"}), 400
+
+    # result = db.insert_one({"username": user, "url": image_url})
+    # print(f"Inserted ID: {result.inserted_id}")
+
+    try:
+        keywords_list = get_dummy_keywords(image_url)
+
+        if not keywords_list:
+            return jsonify({"error": "No keywords returned from keyword API"}), 500
+
+        keywords_str = " ".join(keywords_list)
+
+        requests.get("http://127.0.0.1:5000/jamendo/search", params={"keywords": keywords_str})
+
+        return jsonify({
+            "message": "Keywords extracted and sent to Jamendo.",
+            "keywords": keywords_list,
+        }), 200
+
+
+    except Exception as e:
+        return jsonify({"error": f"Request failed: {str(e)}"}), 500
 
 @app.route('/deezer/search', methods=['GET'])
 def deezer_search():
