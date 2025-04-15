@@ -15,13 +15,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-
 app = Flask(__name__)
 CORS(app)  # Allow requests from all
 
 # Load environment variables from .env file
 load_dotenv()
-
 
 # Get username and password from environment variables
 username = os.getenv('MONGO_USERNAME')
@@ -33,7 +31,6 @@ with open('config.json') as config_file:
     database_name = config['database_name']
 
 logger.info(database_name)
-
 
 app.config["MONGO_URI"] = f"mongodb+srv://{username}:{password}@doodle-dj.c3vk0.mongodb.net/{database_name}"
 mongo = PyMongo(app)
@@ -101,11 +98,9 @@ def search_deezer_tracks(keywords, limit=5):
 
 #     except requests.exceptions.RequestException as e:
 #         return jsonify({"error": f"Request failed: {str(e)}"}), 500
-    
-
 
 def get_dummy_keywords(image_url):
-    return ["main character energy"]
+    return ["main", "character", "energy"]
 
 @app.route('/process', methods=['POST'])
 def process():
@@ -128,14 +123,14 @@ def process():
         keywords_str = "+".join(keywords_list)
         logger.info(keywords_str)
 
-        results = requests.get("http://127.0.0.1:5000/deezer/search", params={"keywords": keywords_str})
+        backend_url = request.host_url.rstrip('/')
+        results = requests.get(f"{backend_url}/deezer/search", params={"keywords": keywords_str})
 
         return jsonify({
             "message": "Keywords extracted and sent to Deezer.",
             "keywords": keywords_str,
             "results":results.json()
         }), 200
-
 
     except Exception as e:
         return jsonify({"error": f"Request failed: {str(e)}"}), 500
@@ -154,7 +149,6 @@ def deezer_search():
     except Exception as e:
         logger.error(f"Error during /deezer/search: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
-
 
 @app.route('/')
 def hello_world():
