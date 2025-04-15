@@ -233,13 +233,18 @@ def process():
         if not keywords_list:
             return jsonify({"error": "No keywords returned from keyword API"}), 500
 
-        keywords_str = " ".join(keywords_list)
+        keywords_str = "+".join(keywords_list)
+        logger.info(keywords_str)
 
-        requests.get("http://127.0.0.1:5000/jamendo/search", params={"keywords": keywords_str})
+        results = requests.get("http://127.0.0.1:5000/deezer/search", params={"keywords": keywords_str})
+
+        logger.debug(f"Deezer Tracks result: {results}")
+        print(results)
 
         return jsonify({
-            "message": "Keywords extracted and sent to Jamendo.",
-            "keywords": keywords_list,
+            "message": "Keywords extracted and sent to Deezer.",
+            "keywords": keywords_str,
+            "results":results.json()
         }), 200
 
 
