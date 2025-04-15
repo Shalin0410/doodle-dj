@@ -12,3 +12,18 @@
   font-weight: 400;
   font-style: normal;
 }
+
+.dropdown-toggle:hover {
+  background-color: #f8f9fa !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.dropdown {
+  position: relative;
+  height: 10rem;
+}
+
+.dropdown-menu {
+  left: 0 !important;
+  width: 100% !important;
+}

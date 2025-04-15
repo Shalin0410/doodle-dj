@@ -1,14 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Button, ButtonGroup } from "react-bootstrap";
-import {
-  Pencil,
-  Eraser,
-  Undo2,
-  Redo2,
-  Trash2,
-  Check,
-  Palette,
-} from "lucide-react";
+import { Pencil, Eraser, Undo2, Redo2, Trash2, Palette } from "lucide-react";
 import "./DrawingCanvas.css";
 
 const DrawingCanvas = ({ onSubmit, isLoading }) => {
@@ -225,8 +217,8 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
       </div>
       <div className="col-11">
         <div className="position-relative">
-          <div className="d-flex justify-content-center mb-3">
-            <div className="toolbar-container">
+          <div className="mb-3">
+            <div className="toolbar-container d-flex justify-content-between">
               <ButtonGroup>
                 {tools.map((t) => (
                   <Button
@@ -267,15 +259,17 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
                 >
                   <Trash2 size={20} />
                 </Button>
-                <Button
-                  className="tool-button"
-                  onClick={handleSubmit}
-                  disabled={isLoading}
-                  variant="light"
-                >
-                  <Check size={20} />
-                </Button>
               </ButtonGroup>
+
+              <Button
+                className="tool-button"
+                onClick={handleSubmit}
+                disabled={isLoading}
+                variant="success"
+              >
+                {/* <Check size={20} /> */}
+                Play My Doodle
+              </Button>
             </div>
           </div>
 

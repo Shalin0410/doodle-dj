@@ -1,12 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { Button, Form, Card, Stack } from "react-bootstrap";
-import { Play, Pause, Heart, Volume2 } from "lucide-react";
+import { Button, Form, Card, Stack, Image } from "react-bootstrap";
+import { Play, Pause, Volume2 } from "lucide-react";
 import "./MusicPlayer.css";
-// interface Song {
-//   title: string
-//   artist: string
-//   url: string
-// }
 
 const MusicPlayer = ({ songs, setSongs }) => {
   const [currentSong, setCurrentSong] = useState(0);
@@ -48,12 +43,7 @@ const MusicPlayer = ({ songs, setSongs }) => {
         });
       }
     }
-  }, []); // Empty dependency array means this runs once on mount
-
-  // useEffect(() => {
-  //   // Reset error when changing songs
-  //   setError(null);
-  // }, []); // Removed unnecessary dependency: currentSong
+  }, []);
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
@@ -115,7 +105,7 @@ const MusicPlayer = ({ songs, setSongs }) => {
     <div className="p-3 rounded music-player">
       <audio
         ref={audioRef}
-        src={songs[currentSong].url}
+        src={songs[currentSong].preview_url}
         onTimeUpdate={handleTimeUpdate}
         onEnded={handleSongEnd}
         onError={(e) => {
@@ -129,9 +119,6 @@ const MusicPlayer = ({ songs, setSongs }) => {
       <div className="d-flex justify-content-between align-items-center mb-2">
         <h5 className="m-0 fw-bold">Currently Playing:</h5>
         <div className="d-flex gap-2">
-          <Button variant="outline-danger" className="rounded-circle">
-            <Heart size={16} />
-          </Button>
           <Button variant="light" className="rounded-pill" onClick={handleSkip}>
             Skip
           </Button>
@@ -141,28 +128,15 @@ const MusicPlayer = ({ songs, setSongs }) => {
       <Card className="mb-3 bg-light">
         <Card.Body className="p-2">
           <div className="d-flex align-items-center mb-2">
-            <div
-              className="me-2"
-              style={{ width: "40px", height: "40px", position: "relative" }}
-            >
-              <div
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  backgroundColor: "#333",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  color: "white",
-                  fontSize: "10px",
-                  textAlign: "center",
-                }}
-              >
-                ALBUM
-              </div>
+            <div className="me-2">
+              <Image
+                src={songs[currentSong].image}
+                alt="Album Art"
+                style={{ width: "3rem", height: "3rem" }}
+              />
             </div>
             <div className="flex-grow-1">
-              <div className="fw-bold">{songs[currentSong].title}</div>
+              <div className="fw-bold">{songs[currentSong].track_name}</div>
               <div className="text-muted">{songs[currentSong].artist}</div>
             </div>
             <div>
@@ -221,32 +195,15 @@ const MusicPlayer = ({ songs, setSongs }) => {
             >
               <Card.Body className="p-2">
                 <div className="d-flex align-items-center">
-                  <div
-                    className="me-2"
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      position: "relative",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "40px",
-                        height: "40px",
-                        backgroundColor: "#333",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "white",
-                        fontSize: "10px",
-                        textAlign: "center",
-                      }}
-                    >
-                      ALBUM
-                    </div>
+                  <div className="me-2">
+                    <Image
+                      src={song.image}
+                      alt="Album Art"
+                      style={{ width: "3rem", height: "3rem" }}
+                    />
                   </div>
                   <div>
-                    <div className="fw-bold">{song.title}</div>
+                    <div className="fw-bold">{song.track_name}</div>
                     <div className="text-muted">{song.artist}</div>
                   </div>
                 </div>

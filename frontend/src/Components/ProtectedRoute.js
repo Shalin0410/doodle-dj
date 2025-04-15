@@ -5,7 +5,7 @@ import { auth } from "../firebaseConfig";
 const ProtectedRoute = ({ children }) => {
   const [user, loading] = useAuthState(auth);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <div></div>;
 
   if (!user) return <Navigate to="/" replace />;
 

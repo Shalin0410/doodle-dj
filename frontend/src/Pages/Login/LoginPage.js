@@ -28,6 +28,7 @@ const LoginPage = () => {
           just draw, and we'll match your vibe with the perfect tunes!
         </p>
       </div>
+
       <div className=" d-flex justify-content-end">
         <img className="right-image" src={rightImage} alt="rightImage" />
       </div>
