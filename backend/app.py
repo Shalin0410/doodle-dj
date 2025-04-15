@@ -1,10 +1,12 @@
 from flask import Flask, jsonify
 from flask_pymongo import PyMongo
+from flask_cors import CORS
 from dotenv import load_dotenv
 import os
 import json
 
 app = Flask(__name__)
+CORS(app)  # Allow requests from all
 
 # Load environment variables from .env file
 load_dotenv()
@@ -27,7 +29,7 @@ db = mongo.db.users
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World!'
+    return 'Hello, World from Doodle DJ!'
 
 @app.route('/users', methods=['GET'])
 def get_users():
@@ -36,8 +38,6 @@ def get_users():
 
 if __name__ == '__main__':
     try:
-        print(f"MongoDB Username: {username}")
-        print(f"Database Name: {database_name}")
-        app.run(debug=True)
+        app.run(host="0.0.0.0", port=5000, debug=True)
     except Exception as e:
         print(f"An error occurred: {e}")
