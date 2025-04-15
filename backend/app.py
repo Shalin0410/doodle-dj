@@ -33,7 +33,6 @@ with open('config.json') as config_file:
 logger.info(database_name)
 
 db_username=os.getenv("Username")
-db_password = os.getenv("Pwd")
 
 app.config["MONGO_URI"] = f"mongodb+srv://{username}:{password}@doodle-dj.c3vk0.mongodb.net/{database_name}"
 mongo = PyMongo(app)
