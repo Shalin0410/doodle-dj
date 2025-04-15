@@ -129,7 +129,10 @@ def process():
 
         results = requests.get("http://127.0.0.1:5000/deezer/search", params={"keywords": keywords_str})
 
-        logger.debug(f"Deezer Tracks result: {results}")
+        try:
+            logger.debug(f"Deezer Tracks result: Status Code: {results.status_code}, Response: {results.json()}")
+        except ValueError as e:
+            logger.error(f"Failed to parse JSON response: {str(e)}")
         print(results)
 
         return jsonify({
