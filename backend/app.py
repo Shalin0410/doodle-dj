@@ -20,6 +20,7 @@ app = Flask(__name__)
 # Load environment variables from .env file
 load_dotenv()
 
+
 # Get username and password from environment variables
 username = os.getenv('MONGO_USERNAME')
 password = os.getenv('MONGO_PASSWORD')
@@ -32,7 +33,11 @@ with open('config.json') as config_file:
     config = json.load(config_file)
     database_name = config['database_name']
 
-# MongoDB Atlas Connection
+logger.info(database_name)
+
+db_username=os.getenv("Username")
+db_password = os.getenv("Pwd")
+
 app.config["MONGO_URI"] = f"mongodb+srv://{username}:{password}@doodle-dj.c3vk0.mongodb.net/{database_name}"
 mongo = PyMongo(app)
 
@@ -213,7 +218,7 @@ def jamendo_search():
 
 
 def get_dummy_keywords(image_url):
-    return ["happy main character energy"]
+    return ["main character energy"]
 
 @app.route('/process', methods=['POST'])
 def process():
@@ -224,8 +229,8 @@ def process():
     if not image_url or not user:
         return jsonify({"error": "Missing 'url' or 'username'"}), 400
 
-    # result = db.insert_one({"username": user, "url": image_url})
-    # print(f"Inserted ID: {result.inserted_id}")
+    result = db.insert_one({"username": user, "url": image_url})
+    print(f"Inserted ID: {result.inserted_id}")
 
     try:
         keywords_list = get_dummy_keywords(image_url)
