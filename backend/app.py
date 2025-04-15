@@ -116,7 +116,7 @@ def process():
         return jsonify({"error": "Missing 'url' or 'username'"}), 400
 
     result = db.insert_one({"username": user, "url": image_url})
-    print(f"Inserted ID: {result.inserted_id}")
+    logger.info(f"Inserted ID: {result.inserted_id}")
 
     try:
         keywords_list = get_dummy_keywords(image_url)
