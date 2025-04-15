@@ -152,7 +152,7 @@ def deezer_search():
 
 @app.route('/')
 def hello_world():
-    return 'Hello, World from Doodle DJ!'
+    return 'Hello, World!'
 
 @app.route('/users', methods=['GET'])
 def get_users():
