@@ -1,0 +1,46 @@
+@import url("https://fonts.googleapis.com/css2?family=Modak&family=Roboto:wght@300;400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Modak&family=Roboto&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Stardos+Stencil:wght@400;700&display=swap");
+
+.login-page {
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(90deg, rgba(246, 64, 195) 0%, #df7d41 100%);
+}
+
+.logo {
+  color: white;
+  font-family: "Modak", serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 48px;
+  margin-left: 3rem;
+  margin-top: 4vh;
+}
+
+.tag-line {
+  font-family: "Black Ops One", serif;
+  font-size: 80px;
+  width: 50%;
+}
+
+.hero-caption {
+  font-family: "Stardos Stencil", serif;
+  font-weight: 400;
+  font-style: normal;
+  color: white;
+  font-size: 1.5rem;
+}
+
+.right-image {
+  width: 43rem;
+  position: absolute;
+  bottom: 44px;
+  right: -3rem;
+}
+
+.footer {
+  background-color: #f9afaf;
+  color: #000000;
+  font-family: "Roboto", sans-serif;
+}

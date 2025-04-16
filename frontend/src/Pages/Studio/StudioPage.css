@@ -1,0 +1,29 @@
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Parisienne&display=swap");
+
+.studio-page {
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(90deg, rgba(246, 64, 195) 0%, #df7d41 100%);
+}
+
+.song-list {
+  font-family: "Parisienne", cursive;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.dropdown-toggle:hover {
+  background-color: #f8f9fa !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+.dropdown {
+  position: relative;
+  height: 10rem;
+}
+
+.dropdown-menu {
+  left: 0 !important;
+  width: 100% !important;
+}
