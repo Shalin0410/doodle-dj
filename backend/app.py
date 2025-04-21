@@ -35,7 +35,6 @@ logger.info(database_name)
 app.config["MONGO_URI"] = f"mongodb+srv://{username}:{password}@doodle-dj.c3vk0.mongodb.net/{database_name}"
 mongo = PyMongo(app)
 
-# Sample Collection
 db = mongo.db.users
 
 def search_deezer_tracks(keywords, limit=5):
@@ -68,39 +67,31 @@ def search_deezer_tracks(keywords, limit=5):
     logger.debug(f"Deezer Tracks result: {results}")
     return results
 
-# @app.route('/process', methods=['POST'])
-# def process():
-#     data = request.get_json()
-#     image_url = data.get('url')
-#     user = data.get('username')
 
-#     if not image_url or not user:
-#         return jsonify({"error": "Missing 'url' or 'username'"}), 400
+def get_keywords_from_api(image_64):
+    url = "http://34.45.241.77:8000/analyze/"
+    payload = {
+        "image_base64": image_64
+    }
 
-#     db.insert_one({"username": user, "url": image_url})
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            data = response.json()
+            mood = data.get("mood", "")
+            caption = data.get("caption", "")
+            logger.info(mood)
+            logger.info(caption)
+            # keywords = [mood, caption] if mood and caption else []
+            keywords=[mood] if mood else []
+            return keywords
+        else:
+            logger.error(f"API error: {response.status_code} - {response.text}")
+            return []
+    except Exception as e:
+        logger.error(f"API call failed: {e}")
+        return []
 
-#     try:
-#         keyword_response = requests.post("https://first-api.com/get_keywords", json={"image_url": image_url})
-#         keyword_response.raise_for_status()
-#         keywords_list = keyword_response.json().get("keywords", [])
-
-#         if not keywords_list:
-#             return jsonify({"error": "No keywords returned from keyword API"}), 500
-
-#         keywords_str = " ".join(keywords_list)
-
-#         requests.get("http://127.0.0.1:5000//jamendo/search", params={"keywords": keywords_str})
-
-#         return jsonify({
-#             "message": "Keywords extracted and sent to Jamendo.",
-#             "keywords": keywords_list
-#         }), 200
-
-#     except requests.exceptions.RequestException as e:
-#         return jsonify({"error": f"Request failed: {str(e)}"}), 500
-
-def get_dummy_keywords(image_url):
-    return ["main", "character", "energy"]
 
 @app.route('/process', methods=['POST'])
 def process():
@@ -115,7 +106,9 @@ def process():
     logger.info(f"Inserted ID: {result.inserted_id}")
 
     try:
-        keywords_list = get_dummy_keywords(image_url)
+        if image_url.startswith("data:"):
+            image_url = image_url.split(",")[1]
+        keywords_list = get_keywords_from_api(image_url)
 
         if not keywords_list:
             return jsonify({"error": "No keywords returned from keyword API"}), 500
