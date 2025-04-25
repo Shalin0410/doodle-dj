@@ -127,6 +127,23 @@ def process():
 
     except Exception as e:
         return jsonify({"error": f"Request failed: {str(e)}"}), 500
+    
+@app.route('/get-images', methods=['GET'])
+def get_images():
+    user = request.args.get('username')
+
+    if not user:
+        return jsonify({"error": "Missing 'username'"}), 400
+
+    results = db.find({"username": user})
+    urls = [doc["url"] for doc in results]
+
+    logger.info(f"Fetched {len(urls)} image URLs for user '{user}'")
+
+    return jsonify({
+        "username": user,
+        "urls": urls
+    })
 
 @app.route('/deezer/search', methods=['GET'])
 def deezer_search():
@@ -142,6 +159,9 @@ def deezer_search():
     except Exception as e:
         logger.error(f"Error during /deezer/search: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
+
+
+
 
 @app.route('/')
 def hello_world():
