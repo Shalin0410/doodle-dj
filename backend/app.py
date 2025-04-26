@@ -22,9 +22,8 @@ CORS(app)  # Allow requests from all
 load_dotenv()
 
 # Get username and password from environment variables
-username = os.getenv('MONGO_USERNAME')
-password = os.getenv('MONGO_PASSWORD')
-
+username = "aswami"
+password = "7e01KrUmFjo4C4bV"
 # Load database name from config file
 with open('config.json') as config_file:
     config = json.load(config_file)
@@ -36,6 +35,7 @@ app.config["MONGO_URI"] = f"mongodb+srv://{username}:{password}@doodle-dj.c3vk0.
 mongo = PyMongo(app)
 
 db = mongo.db.users
+
 
 def search_deezer_tracks(keywords, limit=5):
     logger.info(f"Searching Deezer for keywords: {keywords}")
@@ -57,7 +57,8 @@ def search_deezer_tracks(keywords, limit=5):
             "artist": item["artist"]["name"],
             "album": item["album"]["title"],
             "preview_url": item["preview"],  # 30s preview MP3 stream
-            "embed_url": f"https://widget.deezer.com/widget/dark/track/{item['id']}",  # Full playback via iframe
+            # Full playback via iframe
+            "embed_url": f"https://widget.deezer.com/widget/dark/track/{item['id']}",
             "external_url": item["link"],
             "image": item["album"]["cover_medium"]
         }
@@ -83,10 +84,11 @@ def get_keywords_from_api(image_64):
             logger.info(mood)
             logger.info(caption)
             # keywords = [mood, caption] if mood and caption else []
-            keywords=[mood] if mood else []
+            keywords = [mood] if mood else []
             return keywords
         else:
-            logger.error(f"API error: {response.status_code} - {response.text}")
+            logger.error(
+                f"API error: {response.status_code} - {response.text}")
             return []
     except Exception as e:
         logger.error(f"API call failed: {e}")
@@ -117,16 +119,18 @@ def process():
         logger.info(keywords_str)
 
         backend_url = request.host_url.rstrip('/')
-        results = requests.get(f"{backend_url}/deezer/search", params={"keywords": keywords_str})
+        results = requests.get(
+            f"{backend_url}/deezer/search", params={"keywords": keywords_str})
 
         return jsonify({
             "message": "Keywords extracted and sent to Deezer.",
             "keywords": keywords_str,
-            "results":results.json()
+            "results": results.json()
         }), 200
 
     except Exception as e:
         return jsonify({"error": f"Request failed: {str(e)}"}), 500
+
 
 @app.route('/deezer/search', methods=['GET'])
 def deezer_search():
@@ -137,23 +141,27 @@ def deezer_search():
 
     try:
         results = search_deezer_tracks(keywords)
-        logger.info(f"Returning {len(results)} Deezer results for query: '{keywords}'")
+        logger.info(
+            f"Returning {len(results)} Deezer results for query: '{keywords}'")
         return jsonify(results)
     except Exception as e:
         logger.error(f"Error during /deezer/search: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
 
+
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
+
 
 @app.route('/users', methods=['GET'])
 def get_users():
     users = list(db.find({}, {"_id": 0}))
     return jsonify(users)
 
+
 if __name__ == '__main__':
     try:
-        app.run(host="0.0.0.0", port=5000, debug=True)
+        app.run(host="0.0.0.0", port=5001, debug=True)
     except Exception as e:
         print(f"An error occurred: {e}")
