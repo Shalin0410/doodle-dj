@@ -6,6 +6,7 @@ import StudioPage from "./Pages/Studio/StudioPage";
 import ProtectedRoute from "./Components/ProtectedRoute"; // Add this
 import Favorites from "./Pages/Favorites/Favorites";
 import History from "./Pages/History/History";
+import { Navigate } from "react-router-dom"; // Add this
 
 function App() {
   return (
@@ -35,7 +36,8 @@ function App() {
           </ProtectedRoute>
         }
       />
-      {/* <Route path="/studio" element={<StudioPage />} /> */}
+
+      <Route path="*" element={<Navigate to="/studio" replace />} />
     </Routes>
   );
 }

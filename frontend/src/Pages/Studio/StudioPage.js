@@ -39,7 +39,7 @@ const StudioPage = () => {
   const handleDrawingSubmit = async (imageData) => {
     setIsLoading(true);
     try {
-      const API_URL = "http://localhost:5001";
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
       const response = await fetch(`${API_URL}/process`, {
         method: "POST",
         headers: {

@@ -28,7 +28,7 @@ const History = () => {
 
   const fetchHistory = async (email) => {
     try {
-      const API_URL = "http://localhost:5001";
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
       const response = await fetch(`${API_URL}/get-images?username=${email}`);
       const data = await response.json();
       setHistoryImages(data.urls || []);

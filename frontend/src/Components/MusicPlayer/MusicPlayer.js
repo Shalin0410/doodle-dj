@@ -49,7 +49,8 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
-        const API_URL = "http://localhost:5001";
+        const API_URL =
+          process.env.REACT_APP_API_URL || "http://localhost:5001";
         const response = await fetch(
           `${API_URL}/favorites?username=${user.email}`
         );
@@ -123,7 +124,7 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
 
   const handleAddToFavorites = async (song) => {
     try {
-      const API_URL = "http://localhost:5001";
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
       const response = await fetch(`${API_URL}/favorites/add`, {
         method: "POST",
         headers: {
@@ -151,7 +152,7 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
 
   const handleDeleteFromFavorites = async (song) => {
     try {
-      const API_URL = "http://localhost:5001";
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
       const response = await fetch(`${API_URL}/favorites/delete`, {
         method: "POST",
         headers: {
