@@ -81,11 +81,11 @@ def get_keywords_from_api(image_64):
         if response.status_code == 200:
             data = response.json()
             mood = data.get("mood", "")
-            caption = data.get("caption", "")
+            caption = data.get("keyword", "")
             logger.info(mood)
             logger.info(caption)
-            # keywords = [mood, caption] if mood and caption else []
-            keywords = [mood] if mood else []
+            keywords = [mood, caption] if mood and caption else []
+            # keywords=[mood] if mood else []
             return keywords
         else:
             logger.error(
@@ -159,10 +159,56 @@ def deezer_search():
         return jsonify({"error": "Missing 'keywords' parameter"}), 400
 
     try:
-        results = search_deezer_tracks(keywords)
-        logger.info(
-            f"Returning {len(results)} Deezer results for query: '{keywords}'")
-        return jsonify(results)
+        # Split keywords by spaces
+        keywords_list = keywords.split()
+
+        if len(keywords_list) < 1:
+            return jsonify({"error": "At least caption must be provided."}), 400
+
+        caption = keywords_list[-1]
+        moods = keywords_list[:-1]
+
+        logger.info(f"Searching using caption: {caption}")
+        caption_results = search_deezer_tracks(caption, limit=5)
+
+        mood_results = []
+        if moods:
+            mood_query = " ".join(moods).strip()
+            logger.info(f"Searching using moods: {mood_query}")
+            mood_results = search_deezer_tracks(mood_query, limit=5)
+
+        # Pick songs safely
+        selected_caption_songs = caption_results[:min(3, len(caption_results))]
+        selected_mood_songs = mood_results[:min(2, len(mood_results))]
+
+        final_songs = selected_caption_songs + selected_mood_songs
+
+        # Fill missing songs from leftovers
+        if len(final_songs) < 5:
+            more_from_caption = caption_results[3:]
+            for song in more_from_caption:
+                if len(final_songs) < 5:
+                    final_songs.append(song)
+
+        if len(final_songs) < 5:
+            more_from_mood = mood_results[2:]
+            for song in more_from_mood:
+                if len(final_songs) < 5:
+                    final_songs.append(song)
+
+        # 🔥 Final Top Global Fallback if still not 5
+        if len(final_songs) < 5:
+            logger.info(
+                f"Fetching top hits to fill missing {5 - len(final_songs)} songs.")
+            top_hits_results = search_deezer_tracks("Top Hits", limit=5)
+            for song in top_hits_results:
+                if len(final_songs) < 5:
+                    final_songs.append(song)
+
+        logger.info(f"Returning {len(final_songs)} Deezer results.")
+
+        return jsonify(final_songs), 200
+
     except Exception as e:
         logger.error(f"Error during /deezer/search: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
