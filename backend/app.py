@@ -35,6 +35,7 @@ app.config["MONGO_URI"] = f"mongodb+srv://{username}:{password}@doodle-dj.c3vk0.
 mongo = PyMongo(app)
 
 db = mongo.db.users
+favorites_db = mongo.db.favorites
 
 
 def search_deezer_tracks(keywords, limit=5):
@@ -147,6 +148,44 @@ def deezer_search():
     except Exception as e:
         logger.error(f"Error during /deezer/search: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
+
+
+@app.route('/favorites/add', methods=['POST'])
+def add_favorite():
+    data = request.get_json()
+    user = data.get('username')
+    url = data.get('preview_url')
+
+    if not user or not url:
+        return jsonify({"error": "Missing 'username' or 'preview_url'"}), 400
+
+    existing = favorites_db.find_one({"username": user})
+
+    if existing:
+        if url not in existing['favorites']:
+            favorites_db.update_one(
+                {"username": user},
+                {"$push": {"favorites": url}}
+            )
+    else:
+        favorites_db.insert_one({"username": user, "favorites": [url]})
+
+    return jsonify({"message": "favorite added successfully."}), 200
+
+
+@app.route('/favorites', methods=['GET'])
+def get_favorites():
+    user = request.args.get('username')
+
+    if not user:
+        return jsonify({"error": "Missing 'username' parameter"}), 400
+
+    data = favorites_db.find_one({"username": user}, {"_id": 0})
+
+    if not data:
+        return jsonify({"username": user, "favorites": []}), 200
+
+    return jsonify(data), 200
 
 
 @app.route('/')
