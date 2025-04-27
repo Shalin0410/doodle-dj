@@ -131,7 +131,7 @@ const MusicPlayer = ({ songs, setSongs, user }) => {
         },
         body: JSON.stringify({
           username: user.email,
-          favorites: [song.preview_url],
+          preview_url: song.preview_url,
         }),
       });
 
@@ -170,7 +170,7 @@ const MusicPlayer = ({ songs, setSongs, user }) => {
 
       <div className="d-flex justify-content-between align-items-center mb-2">
         <h5 className="m-0 fw-bold overflow-hidden">Currently Playing:</h5>
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-2 z-3">
           <Button
             variant="outline-danger"
             className="rounded-circle"
