@@ -172,19 +172,22 @@ def deezer_search():
 def add_favorite():
     data = request.get_json()
     user = data.get('username')
-    url = data.get('preview_url')
+    song = data.get('song')
 
-    if not user or not url:
-        return jsonify({"error": "Missing 'username' or 'preview_url'"}), 400
+    if not user or not song:
+        return jsonify({"error": "Missing 'username' or 'song'"}), 400
 
     existing = favorites_db.find_one({"username": user})
 
     if existing:
-        if url not in existing['favorites']:
-            favorites_db.update_one(
-                {"username": user},
-                {"$push": {"favorites": url}}
-            )
+        # SAFELY check for duplicates
+        if any(isinstance(fav, dict) and fav.get('preview_url') == song['preview_url'] for fav in existing['favorites']):
+            return jsonify({"message": "Song already in favorites."}), 200
+
+        favorites_db.update_one(
+            {"username": user},
+            {"$push": {"favorites": song}}
+        )
     else:
         favorites_db.insert_one({"username": user, "favorites": [url]})
 
@@ -204,6 +207,31 @@ def get_favorites():
         return jsonify({"username": user, "favorites": []}), 200
 
     return jsonify(data), 200
+
+
+@app.route('/favorites/delete', methods=['POST'])
+def delete_favorite():
+    data = request.get_json()
+    user = data.get('username')
+    preview_url = data.get('preview_url')
+
+    if not user or not preview_url:
+        return jsonify({"error": "Missing 'username' or 'preview_url'"}), 400
+
+    existing = favorites_db.find_one({"username": user})
+
+    if not existing:
+        return jsonify({"error": "User not found."}), 404
+
+    result = favorites_db.update_one(
+        {"username": user},
+        {"$pull": {"favorites": {"preview_url": preview_url}}}
+    )
+
+    if result.modified_count == 0:
+        return jsonify({"message": "Favorite not found or already removed."}), 404
+
+    return jsonify({"message": "Favorite removed successfully."}), 200
 
 
 @app.route('/')
