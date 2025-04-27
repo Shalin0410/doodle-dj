@@ -189,9 +189,9 @@ def add_favorite():
             {"$push": {"favorites": song}}
         )
     else:
-        favorites_db.insert_one({"username": user, "favorites": [url]})
+        favorites_db.insert_one({"username": user, "favorites": [song]})
 
-    return jsonify({"message": "favorite added successfully."}), 200
+    return jsonify({"message": "Favorite added successfully."}), 200
 
 
 @app.route('/favorites', methods=['GET'])
