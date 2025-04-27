@@ -3,7 +3,7 @@ import { Button, ButtonGroup } from "react-bootstrap";
 import { Pencil, Eraser, Undo2, Redo2, Trash2, Palette } from "lucide-react";
 import "./DrawingCanvas.css";
 
-const DrawingCanvas = ({ onSubmit, isLoading }) => {
+const DrawingCanvas = ({ onSubmit, isLoading, initialImageData }) => {
   const canvasRef = useRef(null);
   const colorInputRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -64,8 +64,17 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, rect.width, rect.height);
 
-    saveToHistory(ctx.getImageData(0, 0, rect.width, rect.height));
-  }, []);
+    if (initialImageData) {
+      const img = new Image();
+      img.onload = () => {
+        ctx.drawImage(img, 0, 0, rect.width, rect.height);
+        saveToHistory(ctx.getImageData(0, 0, rect.width, rect.height));
+      };
+      img.src = initialImageData;
+    } else {
+      saveToHistory(ctx.getImageData(0, 0, rect.width, rect.height));
+    }
+  }, [initialImageData]);
 
   const saveToHistory = (imageData) => {
     setHistory((prev) => [...prev.slice(0, historyIndex + 1), imageData]);

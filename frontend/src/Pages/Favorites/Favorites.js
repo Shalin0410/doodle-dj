@@ -1,55 +1,43 @@
+import React, { useState, useEffect } from "react";
+import "./Favorites.css";
 import redLogo from "../../Assets/redLogo.png";
-// import LogoutBtn from "../../Components/LogoutBtn/LogoutBtn";
-import "./StudioPage.css";
-import { useState, useEffect } from "react";
-import DrawingCanvas from "../../Components/DrawingCanvas/DrawingCanvas";
-import MusicPlayer from "../../Components/MusicPlayer/MusicPlayer";
 import { auth } from "../../firebaseConfig";
 import { Dropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import MusicPlayer from "../../Components/MusicPlayer/MusicPlayer";
 
-const StudioPage = () => {
-  const [songs, setSongs] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+const Favorites = () => {
   const [user, setUser] = useState(null);
+  const [songs, setSongs] = useState([]); // Favorite songs list
   const navigate = useNavigate();
-  const location = useLocation();
-  const initialImageData = location.state?.imageData || null;
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUser(user);
+        // Optionally fetch user's favorites here
+        fetchFavorites(user.email);
       } else {
         setUser(null);
       }
     });
 
-    return () => unsubscribe(); // Cleanup
+    return () => unsubscribe();
   }, []);
 
-  const handleDrawingSubmit = async (imageData) => {
-    setIsLoading(true);
+  const fetchFavorites = async (email) => {
     try {
       const API_URL = "http://localhost:5001";
-      const response = await fetch(`${API_URL}/process`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url: imageData, username: user.email }),
-      });
+      const response = await fetch(`${API_URL}/favorites?username=${email}`);
       const data = await response.json();
-      const songs = data.results || [];
-      setSongs(songs.length ? songs : []);
+      setSongs(data.favorites || []);
     } catch (error) {
-      console.error("Error getting song recommendations:", error);
+      console.error("Error fetching favorites:", error);
     }
-    setIsLoading(false);
   };
 
   return (
-    <div className="studio-page container-fluid">
+    <div className="favorites-page container-fluid">
       <div className="row">
         <div className="d-flex justify-content-between">
           <div className="d-flex justify-content-between flex-column">
@@ -104,8 +92,8 @@ const StudioPage = () => {
                       </Dropdown.Item>
                     </OverlayTrigger>
                     <Dropdown.Divider />
-                    <Dropdown.Item onClick={() => navigate("/favorites")}>
-                      Favorites
+                    <Dropdown.Item onClick={() => navigate("/studio")}>
+                      Studio
                     </Dropdown.Item>
                     <Dropdown.Divider />
                     <Dropdown.Item onClick={() => navigate("/history")}>
@@ -122,46 +110,23 @@ const StudioPage = () => {
           </div>
         </div>
       </div>
-      <div className="row" style={{ marginTop: "-13rem" }}>
-        <div className="col-md-8">
-          <DrawingCanvas
-            onSubmit={handleDrawingSubmit}
-            isLoading={isLoading}
-            initialImageData={initialImageData}
-          />
-        </div>
-        <div className="col-md-4 overflow-hidden d-flex flex-column align-items-center justify-content-center">
-          {isLoading ? (
-            <div
-              className="d-flex justify-content-center align-items-center flex-column"
-              style={{ height: "100%" }}
-            >
-              <div className="spinner-border " role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-              <p className="mt-2">
-                Finding the perfect track for your doodle...
-              </p>
-            </div>
-          ) : songs.length === 0 ? (
-            <div className="text-center mt-4 overflow-hidden song-list-color">
-              <p
-                className="mb-3 overflow-hidden song-list"
-                style={{ fontSize: "3vw" }}
-              >
-                Let your creativity flow.
-              </p>
-              <p className="song-list" style={{ fontSize: "1.5vw" }}>
-                Your next favorite song is just a doodle away.
-              </p>
-            </div>
-          ) : (
-            <MusicPlayer songs={songs} setSongs={setSongs} />
-          )}
-        </div>
+
+      {/* Centered Music Player */}
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ marginTop: "-13rem" }}
+      >
+        {songs.length > 0 ? (
+          <MusicPlayer songs={songs} setSongs={setSongs} />
+        ) : (
+          <div className="text-center">
+            <h2>No favorite songs yet.</h2>
+            <p>Start doodling and save your favorites!</p>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default StudioPage;
+export default Favorites;
