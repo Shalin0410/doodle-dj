@@ -121,7 +121,6 @@ const Favorites = () => {
             songs={songs}
             setSongs={setSongs}
             user={user}
-            temp={true}
           />
         ) : (
           <div className="text-center">

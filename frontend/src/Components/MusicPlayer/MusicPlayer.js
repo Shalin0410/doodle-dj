@@ -131,7 +131,7 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
         },
         body: JSON.stringify({
           username: user.email,
-          preview_url: song.preview_url,
+          song: song,
         }),
       });
 
@@ -140,6 +140,36 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
 
       if (response.ok) {
         setFavorites((prev) => [...prev, song.preview_url]); // Add to local favorites
+      } else {
+        setError("Failed to add to favorites.");
+      }
+    } catch (err) {
+      console.error("Error adding to favorites:", err);
+      setError("An error occurred while adding to favorites.");
+    }
+  };
+
+  const handleDeleteFromFavorites = async (song) => {
+    try {
+      const API_URL = "http://localhost:5001";
+      const response = await fetch(`${API_URL}/favorites/delete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: user.email,
+          preview_url: song.preview_url,
+        }),
+      });
+
+      const data = await response.json();
+      console.log(data.message);
+
+      if (response.ok) {
+        setFavorites((prev) =>
+          prev.filter((favorite) => favorite !== song.preview_url)
+        ); // Remove from local favorites
       } else {
         setError("Failed to add to favorites.");
       }
@@ -175,7 +205,13 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
             <Button
               variant="outline-danger"
               className="rounded-circle"
-              onClick={() => handleAddToFavorites(songs[currentSong])}
+              onClick={() => {
+                if (favorites.includes(songs[currentSong].preview_url)) {
+                  handleDeleteFromFavorites(songs[currentSong].preview_url);
+                } else {
+                  handleAddToFavorites(songs[currentSong]);
+                }
+              }}
             >
               <Heart
                 size={16}
