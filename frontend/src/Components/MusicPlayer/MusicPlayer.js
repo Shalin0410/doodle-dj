@@ -177,6 +177,7 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
     } catch (err) {
       console.error("Error removing from favorites:", err);
       setError("An error occurred while removing from favorites.");
+    }
   };
 
   if (songs.length === 0) {
