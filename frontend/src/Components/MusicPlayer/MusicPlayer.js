@@ -68,7 +68,8 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
     };
 
     fetchFavorites();
-  }, [user.email]);
+    // eslint-disable-next-line
+  }, []);
 
   const handleTimeUpdate = () => {
     if (audioRef.current) {
