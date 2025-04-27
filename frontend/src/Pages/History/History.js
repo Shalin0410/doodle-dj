@@ -124,7 +124,11 @@ const History = () => {
                     src={url}
                     className="d-block w-100"
                     alt={`History ${idx}`}
-                    style={{ objectFit: "cover", borderRadius: "1rem" }}
+                    style={{
+                      objectFit: "cover",
+                      borderRadius: "1rem",
+                      cursor: "pointer",
+                    }}
                     onClick={() =>
                       navigate("/studio", { state: { imageData: url } })
                     }

@@ -50,7 +50,9 @@ const MusicPlayer = ({ songs, setSongs, user }) => {
     const fetchFavorites = async () => {
       try {
         const API_URL = "http://localhost:5001";
-        const response = await fetch(`${API_URL}/favorites?username=${user.email}`);
+        const response = await fetch(
+          `${API_URL}/favorites?username=${user.email}`
+        );
         const data = await response.json();
 
         if (response.ok) {

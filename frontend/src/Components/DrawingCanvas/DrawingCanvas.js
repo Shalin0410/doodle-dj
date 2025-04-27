@@ -13,6 +13,7 @@ const DrawingCanvas = ({ onSubmit, isLoading, initialImageData }) => {
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [customColor, setCustomColor] = useState("");
+  const [isInitialImageLoaded, setIsInitialImageLoaded] = useState(false);
 
   const colors = [
     { name: "Yellow", value: "#ffff00" },
@@ -53,28 +54,34 @@ const DrawingCanvas = ({ onSubmit, isLoading, initialImageData }) => {
 
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-
-    // Set canvas size to account for devicePixelRatio
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
-
-    // Scale context to ensure proper drawing coordinates
     ctx.scale(dpr, dpr);
 
+    // Always clear canvas initially
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, rect.width, rect.height);
 
-    if (initialImageData) {
-      const img = new Image();
-      img.onload = () => {
-        ctx.drawImage(img, 0, 0, rect.width, rect.height);
-        saveToHistory(ctx.getImageData(0, 0, rect.width, rect.height));
-      };
-      img.src = initialImageData;
-    } else {
-      saveToHistory(ctx.getImageData(0, 0, rect.width, rect.height));
-    }
-  }, [initialImageData]);
+    // Save blank state to history (only once)
+    saveToHistory(ctx.getImageData(0, 0, rect.width, rect.height));
+  }, []); // Run only once on mount
+
+  useEffect(() => {
+    if (!initialImageData || isInitialImageLoaded) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, rect.width, rect.height);
+      saveToHistory(ctx.getImageData(0, 0, rect.width, rect.height)); // Save loaded image
+      setIsInitialImageLoaded(true);
+    };
+    img.src = initialImageData;
+  }, [initialImageData, isInitialImageLoaded]);
 
   const saveToHistory = (imageData) => {
     setHistory((prev) => [...prev.slice(0, historyIndex + 1), imageData]);

@@ -12,9 +12,17 @@ const StudioPage = () => {
   const [songs, setSongs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [user, setUser] = useState(null);
+
   const navigate = useNavigate();
   const location = useLocation();
   const initialImageData = location.state?.imageData || null;
+
+  useEffect(() => {
+    if (initialImageData) {
+      // Clear the state without changing the page (replace current history entry)
+      navigate(location.pathname, { replace: true });
+    }
+  }, [initialImageData, navigate, location.pathname]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
