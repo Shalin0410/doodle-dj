@@ -1,16 +1,16 @@
 import { useState, useRef, useEffect } from "react";
 import { Button, Form, Card, Stack, Image } from "react-bootstrap";
-import { Play, Pause, Volume2 } from "lucide-react";
+import { Play, Pause, Volume2, Heart } from "lucide-react";
 import "./MusicPlayer.css";
 
-const MusicPlayer = ({ songs, setSongs }) => {
+const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
   const [currentSong, setCurrentSong] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
   const [volume, setVolume] = useState(100);
+  const [favorites, setFavorites] = useState([]);
   const [error, setError] = useState(null);
   const audioRef = useRef(null);
-
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume / 100;
@@ -43,6 +43,31 @@ const MusicPlayer = ({ songs, setSongs }) => {
         });
       }
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const API_URL =
+          process.env.REACT_APP_API_URL || "http://localhost:5001";
+        const response = await fetch(
+          `${API_URL}/favorites?username=${user.email}`
+        );
+        const data = await response.json();
+
+        if (response.ok) {
+          setFavorites(data.favorites); // Store the favorites URLs
+        } else {
+          setError("Failed to fetch favorites.");
+        }
+      } catch (err) {
+        console.error("Error fetching favorites:", err);
+        setError("An error occurred while fetching favorites.");
+      }
+    };
+
+    fetchFavorites();
+    // eslint-disable-next-line
   }, []);
 
   const handleTimeUpdate = () => {
@@ -97,6 +122,64 @@ const MusicPlayer = ({ songs, setSongs }) => {
     return queue;
   };
 
+  const handleAddToFavorites = async (song) => {
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
+      const response = await fetch(`${API_URL}/favorites/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: user.email,
+          song: song,
+        }),
+      });
+
+      const data = await response.json();
+      console.log(data.message);
+
+      if (response.ok) {
+        setFavorites((prev) => [...prev, song]); // Add to local favorites
+      } else {
+        setError("Failed to add to favorites.");
+      }
+    } catch (err) {
+      console.error("Error adding to favorites:", err);
+      setError("An error occurred while adding to favorites.");
+    }
+  };
+
+  const handleDeleteFromFavorites = async (song) => {
+    try {
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
+      const response = await fetch(`${API_URL}/favorites/delete`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: user.email,
+          preview_url: song.preview_url,
+        }),
+      });
+
+      const data = await response.json();
+      console.log(data.message);
+
+      if (response.ok) {
+        setFavorites((prev) =>
+          prev.filter((favorite) => favorite.preview_url !== song.preview_url)
+        ); // Remove from local favorites
+      } else {
+        setError("Failed to add to favorites.");
+      }
+    } catch (err) {
+      console.error("Error adding to favorites:", err);
+      setError("An error occurred while adding to favorites.");
+    }
+  };
+
   if (songs.length === 0) {
     return <div>No songs available</div>;
   }
@@ -117,8 +200,31 @@ const MusicPlayer = ({ songs, setSongs }) => {
       {error && <div className="text-danger text-center mb-3">{error}</div>}
 
       <div className="d-flex justify-content-between align-items-center mb-2">
-        <h5 className="m-0 fw-bold">Currently Playing:</h5>
-        <div className="d-flex gap-2">
+        <h5 className="m-0 fw-bold overflow-hidden">Currently Playing:</h5>
+        <div className="d-flex gap-2 z-3">
+          {!temp && (
+            <Button
+              variant="outline-danger"
+              className="rounded-circle"
+              onClick={() => {
+                if (favorites.includes(songs[currentSong].preview_url)) {
+                  handleDeleteFromFavorites(songs[currentSong]);
+                } else {
+                  handleAddToFavorites(songs[currentSong]);
+                }
+              }}
+            >
+              <Heart
+                size={16}
+                fill={
+                  favorites.includes(songs[currentSong].preview_url)
+                    ? "currentColor"
+                    : "none"
+                }
+              />
+            </Button>
+          )}
+
           <Button variant="light" className="rounded-pill" onClick={handleSkip}>
             Skip
           </Button>
@@ -171,7 +277,7 @@ const MusicPlayer = ({ songs, setSongs }) => {
       </Card>
 
       <div className="d-flex justify-content-between align-items-center mb-2">
-        <h5 className="m-0 fw-bold">Queue:</h5>
+        <h5 className="m-0 fw-bold overflow-hidden">Queue:</h5>
         <Button
           variant="light"
           size="sm"

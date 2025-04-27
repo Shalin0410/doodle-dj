@@ -22,9 +22,8 @@ CORS(app)  # Allow requests from all
 load_dotenv()
 
 # Get username and password from environment variables
-username = os.getenv('MONGO_USERNAME')
-password = os.getenv('MONGO_PASSWORD')
-
+username = "aswami"
+password = "7e01KrUmFjo4C4bV"
 # Load database name from config file
 with open('config.json') as config_file:
     config = json.load(config_file)
@@ -36,6 +35,8 @@ app.config["MONGO_URI"] = f"mongodb+srv://{username}:{password}@doodle-dj.c3vk0.
 mongo = PyMongo(app)
 
 db = mongo.db.users
+favorites_db = mongo.db.favorites
+
 
 def search_deezer_tracks(keywords, limit=5):
     logger.info(f"Searching Deezer for keywords: {keywords}")
@@ -57,7 +58,8 @@ def search_deezer_tracks(keywords, limit=5):
             "artist": item["artist"]["name"],
             "album": item["album"]["title"],
             "preview_url": item["preview"],  # 30s preview MP3 stream
-            "embed_url": f"https://widget.deezer.com/widget/dark/track/{item['id']}",  # Full playback via iframe
+            # Full playback via iframe
+            "embed_url": f"https://widget.deezer.com/widget/dark/track/{item['id']}",
             "external_url": item["link"],
             "image": item["album"]["cover_medium"]
         }
@@ -79,14 +81,15 @@ def get_keywords_from_api(image_64):
         if response.status_code == 200:
             data = response.json()
             mood = data.get("mood", "")
-            caption = data.get("caption", "")
+            caption = data.get("keyword", "")
             logger.info(mood)
             logger.info(caption)
-            # keywords = [mood, caption] if mood and caption else []
-            keywords=[mood] if mood else []
+            keywords = [mood, caption] if mood and caption else []
+            # keywords=[mood] if mood else []
             return keywords
         else:
-            logger.error(f"API error: {response.status_code} - {response.text}")
+            logger.error(
+                f"API error: {response.status_code} - {response.text}")
             return []
     except Exception as e:
         logger.error(f"API call failed: {e}")
@@ -117,16 +120,36 @@ def process():
         logger.info(keywords_str)
 
         backend_url = request.host_url.rstrip('/')
-        results = requests.get(f"{backend_url}/deezer/search", params={"keywords": keywords_str})
+        results = requests.get(
+            f"{backend_url}/deezer/search", params={"keywords": keywords_str})
 
         return jsonify({
             "message": "Keywords extracted and sent to Deezer.",
             "keywords": keywords_str,
-            "results":results.json()
+            "results": results.json()
         }), 200
 
     except Exception as e:
         return jsonify({"error": f"Request failed: {str(e)}"}), 500
+
+
+@app.route('/get-images', methods=['GET'])
+def get_images():
+    user = request.args.get('username')
+
+    if not user:
+        return jsonify({"error": "Missing 'username'"}), 400
+
+    results = db.find({"username": user})
+    urls = [doc["url"] for doc in results]
+
+    logger.info(f"Fetched {len(urls)} image URLs for user '{user}'")
+
+    return jsonify({
+        "username": user,
+        "urls": urls
+    })
+
 
 @app.route('/deezer/search', methods=['GET'])
 def deezer_search():
@@ -136,24 +159,140 @@ def deezer_search():
         return jsonify({"error": "Missing 'keywords' parameter"}), 400
 
     try:
-        results = search_deezer_tracks(keywords)
-        logger.info(f"Returning {len(results)} Deezer results for query: '{keywords}'")
-        return jsonify(results)
+        # Split keywords by spaces
+        keywords_list = keywords.split()
+
+        if len(keywords_list) < 1:
+            return jsonify({"error": "At least caption must be provided."}), 400
+
+        caption = keywords_list[-1]
+        moods = keywords_list[:-1]
+
+        logger.info(f"Searching using caption: {caption}")
+        caption_results = search_deezer_tracks(caption, limit=5)
+
+        mood_results = []
+        if moods:
+            mood_query = " ".join(moods).strip()
+            logger.info(f"Searching using moods: {mood_query}")
+            mood_results = search_deezer_tracks(mood_query, limit=5)
+
+        # Pick songs safely
+        selected_caption_songs = caption_results[:min(3, len(caption_results))]
+        selected_mood_songs = mood_results[:min(2, len(mood_results))]
+
+        final_songs = selected_caption_songs + selected_mood_songs
+
+        # Fill missing songs from leftovers
+        if len(final_songs) < 5:
+            more_from_caption = caption_results[3:]
+            for song in more_from_caption:
+                if len(final_songs) < 5:
+                    final_songs.append(song)
+
+        if len(final_songs) < 5:
+            more_from_mood = mood_results[2:]
+            for song in more_from_mood:
+                if len(final_songs) < 5:
+                    final_songs.append(song)
+
+        # 🔥 Final Top Global Fallback if still not 5
+        if len(final_songs) < 5:
+            logger.info(
+                f"Fetching top hits to fill missing {5 - len(final_songs)} songs.")
+            top_hits_results = search_deezer_tracks("Top Hits", limit=5)
+            for song in top_hits_results:
+                if len(final_songs) < 5:
+                    final_songs.append(song)
+
+        logger.info(f"Returning {len(final_songs)} Deezer results.")
+
+        return jsonify(final_songs), 200
+
     except Exception as e:
         logger.error(f"Error during /deezer/search: {str(e)}", exc_info=True)
         return jsonify({"error": str(e)}), 500
 
+
+@app.route('/favorites/add', methods=['POST'])
+def add_favorite():
+    data = request.get_json()
+    user = data.get('username')
+    song = data.get('song')
+
+    if not user or not song:
+        return jsonify({"error": "Missing 'username' or 'song'"}), 400
+
+    existing = favorites_db.find_one({"username": user})
+
+    if existing:
+        # SAFELY check for duplicates
+        if any(isinstance(fav, dict) and fav.get('preview_url') == song['preview_url'] for fav in existing['favorites']):
+            return jsonify({"message": "Song already in favorites."}), 200
+
+        favorites_db.update_one(
+            {"username": user},
+            {"$push": {"favorites": song}}
+        )
+    else:
+        favorites_db.insert_one({"username": user, "favorites": [song]})
+
+    return jsonify({"message": "Favorite added successfully."}), 200
+
+
+@app.route('/favorites', methods=['GET'])
+def get_favorites():
+    user = request.args.get('username')
+
+    if not user:
+        return jsonify({"error": "Missing 'username' parameter"}), 400
+
+    data = favorites_db.find_one({"username": user}, {"_id": 0})
+
+    if not data:
+        return jsonify({"username": user, "favorites": []}), 200
+
+    return jsonify(data), 200
+
+
+@app.route('/favorites/delete', methods=['POST'])
+def delete_favorite():
+    data = request.get_json()
+    user = data.get('username')
+    preview_url = data.get('preview_url')
+
+    if not user or not preview_url:
+        return jsonify({"error": "Missing 'username' or 'preview_url'"}), 400
+
+    existing = favorites_db.find_one({"username": user})
+
+    if not existing:
+        return jsonify({"error": "User not found."}), 404
+
+    result = favorites_db.update_one(
+        {"username": user},
+        {"$pull": {"favorites": {"preview_url": preview_url}}}
+    )
+
+    if result.modified_count == 0:
+        return jsonify({"message": "Favorite not found or already removed."}), 404
+
+    return jsonify({"message": "Favorite removed successfully."}), 200
+
+
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
+
 
 @app.route('/users', methods=['GET'])
 def get_users():
     users = list(db.find({}, {"_id": 0}))
     return jsonify(users)
 
+
 if __name__ == '__main__':
     try:
-        app.run(host="0.0.0.0", port=5000, debug=True)
+        app.run(host="0.0.0.0", port=5001, debug=True)
     except Exception as e:
         print(f"An error occurred: {e}")

@@ -3,7 +3,7 @@ import { Button, ButtonGroup } from "react-bootstrap";
 import { Pencil, Eraser, Undo2, Redo2, Trash2, Palette } from "lucide-react";
 import "./DrawingCanvas.css";
 
-const DrawingCanvas = ({ onSubmit, isLoading }) => {
+const DrawingCanvas = ({ onSubmit, isLoading, initialImageData }) => {
   const canvasRef = useRef(null);
   const colorInputRef = useRef(null);
   const [isDrawing, setIsDrawing] = useState(false);
@@ -13,6 +13,7 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [customColor, setCustomColor] = useState("");
+  const [isInitialImageLoaded, setIsInitialImageLoaded] = useState(false);
 
   const colors = [
     { name: "Yellow", value: "#ffff00" },
@@ -38,10 +39,19 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
 
     const rect = canvas.getBoundingClientRect();
 
-    return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
+    if (e.touches) {
+      // If it's a touch event
+      return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top,
+      };
+    } else {
+      // Mouse event
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+    }
   };
 
   useEffect(() => {
@@ -53,19 +63,34 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
 
     const dpr = window.devicePixelRatio || 1;
     const rect = canvas.getBoundingClientRect();
-
-    // Set canvas size to account for devicePixelRatio
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
-
-    // Scale context to ensure proper drawing coordinates
     ctx.scale(dpr, dpr);
 
+    // Always clear canvas initially
     ctx.fillStyle = "#ffffff";
     ctx.fillRect(0, 0, rect.width, rect.height);
 
+    // Save blank state to history (only once)
     saveToHistory(ctx.getImageData(0, 0, rect.width, rect.height));
-  }, []);
+  }, []); // Run only once on mount
+
+  useEffect(() => {
+    if (!initialImageData || isInitialImageLoaded) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const img = new Image();
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0, rect.width, rect.height);
+      saveToHistory(ctx.getImageData(0, 0, rect.width, rect.height)); // Save loaded image
+      setIsInitialImageLoaded(true);
+    };
+    img.src = initialImageData;
+  }, [initialImageData, isInitialImageLoaded]);
 
   const saveToHistory = (imageData) => {
     setHistory((prev) => [...prev.slice(0, historyIndex + 1), imageData]);
@@ -73,6 +98,8 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
   };
 
   const startDrawing = (e) => {
+    e.preventDefault(); // Add this line
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -91,6 +118,7 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
 
   const draw = (e) => {
     if (!isDrawing) return;
+    e.preventDefault();
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -286,6 +314,9 @@ const DrawingCanvas = ({ onSubmit, isLoading }) => {
               onMouseMove={draw}
               onMouseUp={stopDrawing}
               onMouseLeave={stopDrawing}
+              onTouchStart={startDrawing} // Add touch events here
+              onTouchMove={draw}
+              onTouchEnd={stopDrawing}
             />
           </div>
 

@@ -1,0 +1,28 @@
+.history-page {
+  height: 100vh;
+  width: 100vw;
+  background: linear-gradient(90deg, rgba(246, 64, 195) 0%, #df7d41 100%);
+}
+
+/* Carousel Controls (left/right arrows) */
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  background-color: rgba(0, 0, 0, 0.5); /* Dark background for arrows */
+  border-radius: 50%;
+  background-size: 100%, 100%;
+}
+
+/* Optional: Add a hover effect for arrows */
+.carousel-control-prev-icon:hover,
+.carousel-control-next-icon:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+/* Carousel Indicators (dots at the bottom) */
+.carousel-indicators [data-bs-target] {
+  background-color: rgba(0, 0, 0, 0.5); /* Darker dots */
+}
+
+.carousel-indicators .active {
+  background-color: rgba(0, 0, 0, 0.9); /* Darker for active dot */
+}

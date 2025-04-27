@@ -1,63 +1,46 @@
+import React, { useState, useEffect } from "react";
+import "./History.css"; // You can reuse Favorites.css if styling is same
 import redLogo from "../../Assets/redLogo.png";
-// import LogoutBtn from "../../Components/LogoutBtn/LogoutBtn";
-import "./StudioPage.css";
-import { useState, useEffect } from "react";
-import DrawingCanvas from "../../Components/DrawingCanvas/DrawingCanvas";
-import MusicPlayer from "../../Components/MusicPlayer/MusicPlayer";
 import { auth } from "../../firebaseConfig";
 import { Dropdown, OverlayTrigger, Tooltip } from "react-bootstrap";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { Carousel } from "react-bootstrap"; // Import Bootstrap Carousel
 
-const StudioPage = () => {
-  const [songs, setSongs] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
+const History = () => {
   const [user, setUser] = useState(null);
-
+  const [historyImages, setHistoryImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const location = useLocation();
-  const initialImageData = location.state?.imageData || null;
-
-  useEffect(() => {
-    if (initialImageData) {
-      // Clear the state without changing the page (replace current history entry)
-      navigate(location.pathname, { replace: true });
-    }
-  }, [initialImageData, navigate, location.pathname]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUser(user);
+        setIsLoading(true);
+        fetchHistory(user.email);
       } else {
         setUser(null);
       }
     });
 
-    return () => unsubscribe(); // Cleanup
+    return () => unsubscribe();
   }, []);
 
-  const handleDrawingSubmit = async (imageData) => {
-    setIsLoading(true);
+  const fetchHistory = async (email) => {
     try {
       const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
-      const response = await fetch(`${API_URL}/process`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ url: imageData, username: user.email }),
-      });
+      const response = await fetch(`${API_URL}/get-images?username=${email}`);
       const data = await response.json();
-      const songs = data.results || [];
-      setSongs(songs.length ? songs : []);
+      setHistoryImages(data.urls || []);
     } catch (error) {
-      console.error("Error getting song recommendations:", error);
+      console.error("Error fetching history:", error);
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (
-    <div className="studio-page container-fluid">
+    <div className="history-page container-fluid">
       <div className="row">
         <div className="d-flex justify-content-between">
           <div className="d-flex justify-content-between flex-column">
@@ -112,12 +95,12 @@ const StudioPage = () => {
                       </Dropdown.Item>
                     </OverlayTrigger>
                     <Dropdown.Divider />
-                    <Dropdown.Item onClick={() => navigate("/favorites")}>
-                      Favorites
+                    <Dropdown.Item onClick={() => navigate("/studio")}>
+                      Studio
                     </Dropdown.Item>
                     <Dropdown.Divider />
-                    <Dropdown.Item onClick={() => navigate("/history")}>
-                      History
+                    <Dropdown.Item onClick={() => navigate("/favorites")}>
+                      Favorites
                     </Dropdown.Item>
                     <Dropdown.Divider />
                     <Dropdown.Item href="#" onClick={() => auth.signOut()}>
@@ -130,46 +113,56 @@ const StudioPage = () => {
           </div>
         </div>
       </div>
-      <div className="row" style={{ marginTop: "-13rem" }}>
-        <div className="col-md-8">
-          <DrawingCanvas
-            onSubmit={handleDrawingSubmit}
-            isLoading={isLoading}
-            initialImageData={initialImageData}
-          />
-        </div>
-        <div className="col-md-4 overflow-hidden d-flex flex-column align-items-center justify-content-center">
-          {isLoading ? (
-            <div
-              className="d-flex justify-content-center align-items-center flex-column"
-              style={{ height: "100%" }}
-            >
-              <div className="spinner-border " role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-              <p className="mt-2">
-                Finding the perfect track for your doodle...
-              </p>
+
+      {/* Centered Carousel */}
+      <div
+        className="d-flex justify-content-center align-items-center"
+        style={{ marginTop: "-8rem", width: "100%" }}
+      >
+        {isLoading && (
+          <div
+            className="d-flex justify-content-center align-items-center flex-column"
+            style={{ height: "100%" }}
+          >
+            <div className="spinner-border " role="status">
+              <span className="visually-hidden">Loading...</span>
             </div>
-          ) : songs.length === 0 ? (
-            <div className="text-center mt-4 overflow-hidden song-list-color">
-              <p
-                className="mb-3 overflow-hidden song-list"
-                style={{ fontSize: "3vw" }}
-              >
-                Let your creativity flow.
-              </p>
-              <p className="song-list" style={{ fontSize: "1.5vw" }}>
-                Your next favorite song is just a doodle away.
-              </p>
-            </div>
-          ) : (
-            <MusicPlayer songs={songs} setSongs={setSongs} user={user} />
-          )}
-        </div>
+            <p className="mt-2">Fetching your history...</p>
+          </div>
+        )}
+        {!isLoading && historyImages.length === 0 && (
+          <div className="text-center">
+            <h2 className="overflow-hidden">No history yet.</h2>
+            <p className="overflow-hidden">
+              Start doodling and view your creations here!
+            </p>
+          </div>
+        )}
+        {!isLoading && historyImages.length > 0 && (
+          <div style={{ width: "30rem", height: "30rem" }}>
+            <Carousel interval={3000} pause="hover">
+              {historyImages.map((url, idx) => (
+                <Carousel.Item key={idx}>
+                  <img
+                    src={url}
+                    className="d-block w-100"
+                    alt={`History ${idx}`}
+                    style={{
+                      objectFit: "cover",
+                      cursor: "pointer",
+                    }}
+                    onClick={() =>
+                      navigate("/studio", { state: { imageData: url } })
+                    }
+                  />
+                </Carousel.Item>
+              ))}
+            </Carousel>
+          </div>
+        )}
       </div>
     </div>
   );
 };
 
-export default StudioPage;
+export default History;
