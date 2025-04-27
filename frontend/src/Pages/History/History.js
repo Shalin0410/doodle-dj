@@ -9,12 +9,14 @@ import { Carousel } from "react-bootstrap"; // Import Bootstrap Carousel
 const History = () => {
   const [user, setUser] = useState(null);
   const [historyImages, setHistoryImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
         setUser(user);
+        setIsLoading(true);
         fetchHistory(user.email);
       } else {
         setUser(null);
@@ -32,6 +34,8 @@ const History = () => {
       setHistoryImages(data.urls || []);
     } catch (error) {
       console.error("Error fetching history:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -115,7 +119,26 @@ const History = () => {
         className="d-flex justify-content-center align-items-center"
         style={{ marginTop: "-8rem", width: "100%" }}
       >
-        {historyImages.length > 0 ? (
+        {isLoading && (
+          <div
+            className="d-flex justify-content-center align-items-center flex-column"
+            style={{ height: "100%" }}
+          >
+            <div className="spinner-border " role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <p className="mt-2">Fetching your history...</p>
+          </div>
+        )}
+        {!isLoading && historyImages.length === 0 && (
+          <div className="text-center">
+            <h2 className="overflow-hidden">No history yet.</h2>
+            <p className="overflow-hidden">
+              Start doodling and view your creations here!
+            </p>
+          </div>
+        )}
+        {!isLoading && historyImages.length > 0 && (
           <div style={{ width: "30rem", height: "30rem" }}>
             <Carousel interval={3000} pause="hover">
               {historyImages.map((url, idx) => (
@@ -135,11 +158,6 @@ const History = () => {
                 </Carousel.Item>
               ))}
             </Carousel>
-          </div>
-        ) : (
-          <div className="text-center">
-            <h2>No history yet.</h2>
-            <p>Start doodling and view your creations here!</p>
           </div>
         )}
       </div>

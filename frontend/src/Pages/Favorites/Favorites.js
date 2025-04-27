@@ -9,6 +9,7 @@ import MusicPlayer from "../../Components/MusicPlayer/MusicPlayer";
 const Favorites = () => {
   const [user, setUser] = useState(null);
   const [songs, setSongs] = useState([]); // Favorite songs list
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -16,6 +17,7 @@ const Favorites = () => {
       if (user) {
         setUser(user);
         // Optionally fetch user's favorites here
+        setIsLoading(true);
         fetchFavorites(user.email);
       } else {
         setUser(null);
@@ -33,6 +35,8 @@ const Favorites = () => {
       setSongs(data.favorites || []);
     } catch (error) {
       console.error("Error fetching favorites:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -112,23 +116,33 @@ const Favorites = () => {
       </div>
 
       {/* Centered Music Player */}
-      <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ marginTop: "-13rem" }}
-      >
-        {songs.length > 0 ? (
-          <MusicPlayer
-            songs={songs}
-            setSongs={setSongs}
-            user={user}
-          />
-        ) : (
-          <div className="text-center">
-            <h2>No favorite songs yet.</h2>
-            <p>Start doodling and save your favorites!</p>
+      {isLoading && (
+        <div
+          className="d-flex justify-content-center align-items-center flex-column"
+        >
+          <div className="spinner-border " role="status">
+            <span className="visually-hidden">Loading...</span>
           </div>
-        )}
-      </div>
+          <p className="mt-2">Fetching your favorites...</p>
+        </div>
+      )}
+
+      {!isLoading && songs.length === 0 && (
+        <div className="text-center">
+          <h2 className="overflow-hidden">No favorite songs yet.</h2>
+          <p className="overflow-hidden">
+            Start doodling and save your favorites!
+          </p>
+        </div>
+      )}
+      {!isLoading && songs.length > 0 && (
+        <div
+          className="d-flex justify-content-center align-items-center"
+          style={{ marginTop: "-13rem" }}
+        >
+          <MusicPlayer songs={songs} setSongs={setSongs} user={user} />
+        </div>
+      )}
     </div>
   );
 };
