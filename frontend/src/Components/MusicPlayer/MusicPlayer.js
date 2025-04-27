@@ -172,12 +172,11 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
           prev.filter((favorite) => favorite.preview_url !== song.preview_url)
         ); // Remove from local favorites
       } else {
-        setError("Failed to add to favorites.");
+        setError("Failed to remove from favorites.");
       }
     } catch (err) {
-      console.error("Error adding to favorites:", err);
-      setError("An error occurred while adding to favorites.");
-    }
+      console.error("Error removing from favorites:", err);
+      setError("An error occurred while removing from favorites.");
   };
 
   if (songs.length === 0) {
