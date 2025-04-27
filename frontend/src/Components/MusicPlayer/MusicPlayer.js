@@ -171,6 +171,10 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
         setFavorites((prev) =>
           prev.filter((favorite) => favorite.preview_url !== song.preview_url)
         ); // Remove from local favorites
+        if (temp) {
+          setSongs((prev) => prev.filter((s) => s.preview_url !== song.preview_url));
+          setCurrentSong(0);
+        }
       } else {
         setError("Failed to add to favorites.");
       }
@@ -202,28 +206,34 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
       <div className="d-flex justify-content-between align-items-center mb-2">
         <h5 className="m-0 fw-bold overflow-hidden">Currently Playing:</h5>
         <div className="d-flex gap-2 z-3">
-          {!temp && (
-            <Button
-              variant="outline-danger"
-              className="rounded-circle"
-              onClick={() => {
-                if (favorites.includes(songs[currentSong].preview_url)) {
-                  handleDeleteFromFavorites(songs[currentSong]);
-                } else {
-                  handleAddToFavorites(songs[currentSong]);
-                }
-              }}
-            >
-              <Heart
-                size={16}
-                fill={
-                  favorites.includes(songs[currentSong].preview_url)
-                    ? "currentColor"
-                    : "none"
-                }
-              />
-            </Button>
-          )}
+          <Button
+            variant="outline-danger"
+            className="rounded-circle"
+            onClick={() => {
+              if (
+                favorites.some(
+                  (favorite) =>
+                    favorite.preview_url === songs[currentSong].preview_url
+                )
+              ) {
+                handleDeleteFromFavorites(songs[currentSong]);
+              } else {
+                handleAddToFavorites(songs[currentSong]);
+              }
+            }}
+          >
+            <Heart
+              size={16}
+              fill={
+                favorites.some(
+                  (favorite) =>
+                    favorite.preview_url === songs[currentSong].preview_url
+                )
+                  ? "currentColor"
+                  : "none"
+              }
+            />
+          </Button>
 
           <Button variant="light" className="rounded-pill" onClick={handleSkip}>
             Skip
@@ -255,14 +265,12 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
               </Button>
             </div>
           </div>
-
           {/* Progress slider */}
           <Form.Range
             value={progress}
             onChange={handleProgressChange}
             className="mt-1"
           />
-
           {/* Volume control */}
           <div className="d-flex align-items-center mt-2">
             <Volume2 size={16} className="me-2 text-muted" />
