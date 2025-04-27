@@ -27,7 +27,7 @@ const Favorites = () => {
 
   const fetchFavorites = async (email) => {
     try {
-      const API_URL = "http://localhost:5001";
+      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5001";
       const response = await fetch(`${API_URL}/favorites?username=${email}`);
       const data = await response.json();
       setSongs(data.favorites || []);
@@ -117,11 +117,7 @@ const Favorites = () => {
         style={{ marginTop: "-13rem" }}
       >
         {songs.length > 0 ? (
-          <MusicPlayer
-            songs={songs}
-            setSongs={setSongs}
-            user={user}
-          />
+          <MusicPlayer songs={songs} setSongs={setSongs} user={user} />
         ) : (
           <div className="text-center">
             <h2>No favorite songs yet.</h2>
