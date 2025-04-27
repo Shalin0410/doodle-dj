@@ -3,7 +3,7 @@ import { Button, Form, Card, Stack, Image } from "react-bootstrap";
 import { Play, Pause, Volume2, Heart } from "lucide-react";
 import "./MusicPlayer.css";
 
-const MusicPlayer = ({ songs, setSongs, user }) => {
+const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
   const [currentSong, setCurrentSong] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -171,20 +171,23 @@ const MusicPlayer = ({ songs, setSongs, user }) => {
       <div className="d-flex justify-content-between align-items-center mb-2">
         <h5 className="m-0 fw-bold overflow-hidden">Currently Playing:</h5>
         <div className="d-flex gap-2 z-3">
-          <Button
-            variant="outline-danger"
-            className="rounded-circle"
-            onClick={() => handleAddToFavorites(songs[currentSong])}
-          >
-            <Heart
-              size={16}
-              fill={
-                favorites.includes(songs[currentSong].preview_url)
-                  ? "currentColor"
-                  : "none"
-              }
-            />
-          </Button>
+          {!temp && (
+            <Button
+              variant="outline-danger"
+              className="rounded-circle"
+              onClick={() => handleAddToFavorites(songs[currentSong])}
+            >
+              <Heart
+                size={16}
+                fill={
+                  favorites.includes(songs[currentSong].preview_url)
+                    ? "currentColor"
+                    : "none"
+                }
+              />
+            </Button>
+          )}
+
           <Button variant="light" className="rounded-pill" onClick={handleSkip}>
             Skip
           </Button>

@@ -117,7 +117,12 @@ const Favorites = () => {
         style={{ marginTop: "-13rem" }}
       >
         {songs.length > 0 ? (
-          <MusicPlayer songs={songs} setSongs={setSongs} />
+          <MusicPlayer
+            songs={songs}
+            setSongs={setSongs}
+            user={user}
+            temp={true}
+          />
         ) : (
           <div className="text-center">
             <h2>No favorite songs yet.</h2>

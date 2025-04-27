@@ -116,7 +116,7 @@ const History = () => {
         style={{ marginTop: "-8rem", width: "100%" }}
       >
         {historyImages.length > 0 ? (
-          <div style={{ width: "20rem" }}>
+          <div style={{ width: "30rem", height: "30rem" }}>
             <Carousel interval={3000} pause="hover">
               {historyImages.map((url, idx) => (
                 <Carousel.Item key={idx}>
@@ -126,7 +126,6 @@ const History = () => {
                     alt={`History ${idx}`}
                     style={{
                       objectFit: "cover",
-                      borderRadius: "1rem",
                       cursor: "pointer",
                     }}
                     onClick={() =>

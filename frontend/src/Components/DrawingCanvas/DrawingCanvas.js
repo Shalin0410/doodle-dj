@@ -39,10 +39,19 @@ const DrawingCanvas = ({ onSubmit, isLoading, initialImageData }) => {
 
     const rect = canvas.getBoundingClientRect();
 
-    return {
-      x: e.clientX - rect.left,
-      y: e.clientY - rect.top,
-    };
+    if (e.touches) {
+      // If it's a touch event
+      return {
+        x: e.touches[0].clientX - rect.left,
+        y: e.touches[0].clientY - rect.top,
+      };
+    } else {
+      // Mouse event
+      return {
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      };
+    }
   };
 
   useEffect(() => {
@@ -89,6 +98,8 @@ const DrawingCanvas = ({ onSubmit, isLoading, initialImageData }) => {
   };
 
   const startDrawing = (e) => {
+    e.preventDefault(); // Add this line
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -107,6 +118,7 @@ const DrawingCanvas = ({ onSubmit, isLoading, initialImageData }) => {
 
   const draw = (e) => {
     if (!isDrawing) return;
+    e.preventDefault();
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -302,6 +314,9 @@ const DrawingCanvas = ({ onSubmit, isLoading, initialImageData }) => {
               onMouseMove={draw}
               onMouseUp={stopDrawing}
               onMouseLeave={stopDrawing}
+              onTouchStart={startDrawing} // Add touch events here
+              onTouchMove={draw}
+              onTouchEnd={stopDrawing}
             />
           </div>
 
