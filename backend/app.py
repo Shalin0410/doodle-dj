@@ -24,6 +24,7 @@ load_dotenv()
 # Get username and password from environment variables
 username = "aswami"
 password = "7e01KrUmFjo4C4bV"
+
 # Load database name from config file
 with open('config.json') as config_file:
     config = json.load(config_file)
@@ -81,10 +82,11 @@ def get_keywords_from_api(image_64):
         if response.status_code == 200:
             data = response.json()
             mood = data.get("mood", "")
-            caption = data.get("keyword", "")
+            caption = data.get("caption", "")
             logger.info(mood)
             logger.info(caption)
             keywords = [mood, caption] if mood and caption else []
+            logger.info(keywords)
             # keywords=[mood] if mood else []
             return keywords
         else:
@@ -159,7 +161,6 @@ def deezer_search():
         return jsonify({"error": "Missing 'keywords' parameter"}), 400
 
     try:
-        # Split keywords by spaces
         keywords_list = keywords.split()
 
         if len(keywords_list) < 1:
@@ -177,13 +178,11 @@ def deezer_search():
             logger.info(f"Searching using moods: {mood_query}")
             mood_results = search_deezer_tracks(mood_query, limit=5)
 
-        # Pick songs safely
         selected_caption_songs = caption_results[:min(3, len(caption_results))]
         selected_mood_songs = mood_results[:min(2, len(mood_results))]
 
         final_songs = selected_caption_songs + selected_mood_songs
 
-        # Fill missing songs from leftovers
         if len(final_songs) < 5:
             more_from_caption = caption_results[3:]
             for song in more_from_caption:
@@ -196,7 +195,6 @@ def deezer_search():
                 if len(final_songs) < 5:
                     final_songs.append(song)
 
-        # 🔥 Final Top Global Fallback if still not 5
         if len(final_songs) < 5:
             logger.info(
                 f"Fetching top hits to fill missing {5 - len(final_songs)} songs.")
@@ -293,6 +291,6 @@ def get_users():
 
 if __name__ == '__main__':
     try:
-        app.run(host="0.0.0.0", port=5001, debug=True)
+        app.run(host="0.0.0.0", port=5000, debug=True)
     except Exception as e:
         print(f"An error occurred: {e}")
