@@ -11,7 +11,6 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
   const [favorites, setFavorites] = useState([]);
   const [error, setError] = useState(null);
   const audioRef = useRef(null);
-
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.volume = volume / 100;
@@ -141,7 +140,7 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
       console.log(data.message);
 
       if (response.ok) {
-        setFavorites((prev) => [...prev, song.preview_url]); // Add to local favorites
+        setFavorites((prev) => [...prev, song]); // Add to local favorites
       } else {
         setError("Failed to add to favorites.");
       }
@@ -170,7 +169,7 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
 
       if (response.ok) {
         setFavorites((prev) =>
-          prev.filter((favorite) => favorite !== song.preview_url)
+          prev.filter((favorite) => favorite.preview_url !== song.preview_url)
         ); // Remove from local favorites
       } else {
         setError("Failed to add to favorites.");
@@ -209,7 +208,7 @@ const MusicPlayer = ({ songs, setSongs, user, temp = false }) => {
               className="rounded-circle"
               onClick={() => {
                 if (favorites.includes(songs[currentSong].preview_url)) {
-                  handleDeleteFromFavorites(songs[currentSong].preview_url);
+                  handleDeleteFromFavorites(songs[currentSong]);
                 } else {
                   handleAddToFavorites(songs[currentSong]);
                 }

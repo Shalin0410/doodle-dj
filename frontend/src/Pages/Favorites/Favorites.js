@@ -117,9 +117,7 @@ const Favorites = () => {
 
       {/* Centered Music Player */}
       {isLoading && (
-        <div
-          className="d-flex justify-content-center align-items-center flex-column"
-        >
+        <div className="d-flex justify-content-center align-items-center flex-column">
           <div className="spinner-border " role="status">
             <span className="visually-hidden">Loading...</span>
           </div>
@@ -140,7 +138,12 @@ const Favorites = () => {
           className="d-flex justify-content-center align-items-center"
           style={{ marginTop: "-13rem" }}
         >
-          <MusicPlayer songs={songs} setSongs={setSongs} user={user} />
+          <MusicPlayer
+            songs={songs}
+            setSongs={setSongs}
+            user={user}
+            temp={true}
+          />
         </div>
       )}
     </div>
