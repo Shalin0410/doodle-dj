@@ -156,7 +156,7 @@ const StudioPage = () => {
               </p>
             </div>
           ) : (
-            <MusicPlayer songs={songs} setSongs={setSongs} />
+            <MusicPlayer songs={songs} setSongs={setSongs} user={user} />
           )}
         </div>
       </div>
