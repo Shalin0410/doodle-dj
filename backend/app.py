@@ -22,22 +22,22 @@ CORS(app)  # Allow requests from all
 load_dotenv()
 
 # Get username and password from environment variables
-username = "aswami"
-password = "7e01KrUmFjo4C4bV"
+username = os.getenv("MONGO_USERNAME")
+password = os.getenv("MONGO_PASSWORD")
+
+if not username or not password:
+    raise EnvironmentError("MONGO_USERNAME and MONGO_PASSWORD must be set in the environment variables.")
 
 # Load database name from config file
 with open('config.json') as config_file:
     config = json.load(config_file)
     database_name = config['database_name']
 
-logger.info(database_name)
-
 app.config["MONGO_URI"] = f"mongodb+srv://{username}:{password}@doodle-dj.c3vk0.mongodb.net/{database_name}"
 mongo = PyMongo(app)
 
 db = mongo.db.users
 favorites_db = mongo.db.favorites
-
 
 def search_deezer_tracks(keywords, limit=5):
     logger.info(f"Searching Deezer for keywords: {keywords}")
