@@ -7,7 +7,7 @@ Python version: `Python 3.12.8`
 Node version: `v22.8.0`
 
 ```
-git clone https://github.com/atharvaswami/doodle-dj.git
+git clone https://github.com/Shalin0410/doodle-dj.git
 cd doodle-dj
 
 cd backend
